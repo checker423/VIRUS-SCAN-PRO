@@ -91,7 +91,11 @@ virus-scan-pro/
 
 ## 🖼️ Screenshots
 
-> _Add your own screenshots here after deployment!_
+### Main Dashboard
+![Main Dashboard](screenshot1.png)
+
+### Scan Results
+![Scan Results](screenshot2.png)
 
 ---
 
