@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AetherScan // Advanced Threat & File Analyzer</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Mainframe Boot Splash Screen -->
+    <div class="splash-screen" id="splash-screen">
+        <div class="splash-scanline"></div>
+        <div class="splash-content">
+            <div class="custom-logo-icon splash-logo-anim" style="transform: scale(1.5); margin-bottom: 20px;">
+                <i class="fa-solid fa-shield shield-bg"></i>
+                <i class="fa-solid fa-bug bug-inner" style="color: #020617;"></i>
+            </div>
+            <div class="terminal-container" id="terminal-container"></div>
+        </div>
+    </div>
+
+    <!-- Background Elements -->
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="custom-logo-icon">
+                    <i class="fa-solid fa-shield shield-bg"></i>
+                    <i class="fa-solid fa-bug bug-inner"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>VIRUS SCAN <span>PRO</span></h1>
+                    <span class="logo-subtitle">SECURE. DETECT. PROTECT.</span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="db-status-badge">
+                    <span class="status-dot green"></span>
+                    <span class="status-label">DB: v4.12.9 (LIVE)</span>
+                </div>
+                <div class="theme-selector-container">
+                    <button class="btn-icon" id="theme-menu-btn" title="Change Cyber Theme">
+                        <i class="fa-solid fa-palette"></i>
+                    </button>
+                    <div class="theme-dropdown hidden" id="theme-dropdown">
+                        <button class="theme-opt active" data-theme="emerald"><span class="theme-dot emerald"></span>Emerald Matrix</button>
+                        <button class="theme-opt" data-theme="cyberpunk"><span class="theme-dot cyberpunk"></span>Amber Hazard</button>
+                        <button class="theme-opt" data-theme="neon-blue"><span class="theme-dot neon-blue"></span>Deep Ocean</button>
+                        <button class="theme-opt" data-theme="crimson"><span class="theme-dot crimson"></span>Crimson Doom</button>
+                    </div>
+                </div>
+                <button class="btn-icon" id="perf-toggle-btn" title="Toggle Performance Mode">
+                    <i class="fa-solid fa-bolt"></i>
+                </button>
+                <button class="btn-icon" id="history-btn" title="Scan History">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </button>
+                <button class="btn-icon" id="sound-toggle-btn" title="Toggle Audio Signals">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <button class="btn-icon" id="open-settings-btn" title="VirusTotal API Integration">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Grid Layout -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Panel: Scanner & Dropzone -->
+            <section class="panel upload-panel">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-microscope text-cyan"></i> FILE INGESTION</h2>
+                    <p class="panel-subtitle">Upload any document, archive, or executable for heuristic inspection</p>
+                </div>
+                
+                <div class="dropzone" id="dropzone">
+                    <input type="file" id="file-input" class="file-input" multiple hidden>
+                    <div class="dropzone-content">
+                        <div class="upload-icon-container">
+                            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                            <div class="scan-line"></div>
+                        </div>
+                        <h3>Drag & drop file here</h3>
+                        <p class="dropzone-text">or <span class="browse-link">browse files</span> from your local system</p>
+                        <span class="dropzone-limit">Maximum file size: 100MB</span>
+                    </div>
+                </div>
+
+                <!-- Active File Details -->
+                <div class="file-details-card hidden" id="file-details-card">
+                    <div class="file-info-header">
+                        <div class="file-icon-wrapper">
+                            <i class="fa-regular fa-file" id="detail-file-icon"></i>
+                        </div>
+                        <div class="file-name-meta">
+                            <h4 id="detail-file-name">filename.exe</h4>
+                            <span id="detail-file-size">4.2 MB</span>
+                        </div>
+                        <button class="btn-close" id="cancel-file-btn"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    
+                    <!-- Progress Steps -->
+                    <div class="analysis-progress-container">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" id="scan-progress-bar"></div>
+                        </div>
+                        
+                        <ul class="analysis-steps">
+                            <li class="step" id="step-hash">
+                                <span class="step-icon"><i class="fa-solid fa-hashtag"></i></span>
+                                <div class="step-details">
+                                    <span class="step-title">SHA-256 Hash Generation</span>
+                                    <span class="step-status">Waiting...</span>
+                                </div>
+                            </li>
+                            <li class="step" id="step-mime">
+                                <span class="step-icon"><i class="fa-solid fa-fingerprint"></i></span>
+                                <div class="step-details">
+                                    <span class="step-title">Magic Byte Validation</span>
+                                    <span class="step-status">Waiting...</span>
+                                </div>
+                            </li>
+                            <li class="step" id="step-heuristics">
+                                <span class="step-icon"><i class="fa-solid fa-brain"></i></span>
+                                <div class="step-details">
+                                    <span class="step-title">Static Heuristics Engine</span>
+                                    <span class="step-status">Waiting...</span>
+                                </div>
+                            </li>
+                            <li class="step" id="step-reputation">
+                                <span class="step-icon"><i class="fa-solid fa-globe"></i></span>
+                                <div class="step-details">
+                                    <span class="step-title">Reputation Lookup</span>
+                                    <span class="step-status">Waiting...</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Results & Diagnostics -->
+            <section class="panel results-panel empty" id="results-panel">
+                <!-- Empty State -->
+                <div class="empty-state" id="results-empty-state">
+                    <i class="fa-solid fa-clipboard-question empty-icon"></i>
+                    <h3>No Analysis Data Available</h3>
+                    <p>Select and scan a file to view comprehensive diagnostic reports, risk coefficients, and security intelligence.</p>
+                </div>
+
+                <!-- Analysis Content -->
+                <div class="results-content hidden" id="results-content">
+                    <div class="results-header">
+                        <h2>DIAGNOSTIC VERDICT</h2>
+                        <span class="verdict-badge" id="verdict-badge">PENDING</span>
+                    </div>
+
+                    <!-- Risk Gauge & Core Info -->
+                    <div class="verdict-summary">
+                        <div class="gauge-container">
+                            <svg class="progress-ring" width="140" height="140">
+                                <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="transparent" r="58" cx="70" cy="70" />
+                                <circle class="progress-ring__circle" id="risk-gauge-circle" stroke="#00f2fe" stroke-width="8" stroke-dasharray="364.4" stroke-dashoffset="364.4" stroke-linecap="round" fill="transparent" r="58" cx="70" cy="70" />
+                            </svg>
+                            <div class="gauge-center">
+                                <span class="gauge-val" id="risk-score-val">0%</span>
+                                <span class="gauge-lbl">RISK INDEX</span>
+                            </div>
+                        </div>
+
+                        <div class="verdict-text-block">
+                            <h3 id="verdict-title">File Appears Safe</h3>
+                            <p id="verdict-description">The heuristic analysis found no malicious code patterns, spoofing attempts, or known file integrity compromises.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tabs Menu -->
+                    <div class="tabs-navigation">
+                        <button class="tab-btn active" data-tab="tab-threats">Multi-Engine Scan</button>
+                        <button class="tab-btn" data-tab="tab-metadata">Metadata & Hashes</button>
+                        <button class="tab-btn" data-tab="tab-hex">Magic Byte Dump</button>
+                        <button class="tab-btn" data-tab="tab-strings">Extracted Strings</button>
+                        <button class="tab-btn" data-tab="tab-ioc">IOCs</button>
+                        <button class="tab-btn" data-tab="tab-pe">Format Analysis</button>
+                        <button class="tab-btn" data-tab="tab-sandbox">Sandbox</button>
+                        <button class="tab-btn" data-tab="tab-mitre">MITRE ATT&CK</button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div class="tab-panes">
+                        
+                        <!-- Tab 1: Threat Analysis (MetaDefender Engine Scan Table) -->
+                        <div class="tab-pane active" id="tab-threats">
+                            <div class="engine-scans-header">
+                                <h3><i class="fa-solid fa-list-check text-green"></i> MULTI-ENGINE INTEGRITY SCAN</h3>
+                                <span class="engine-count" id="engine-summary-count">0 / 10 Engines Flagged</span>
+                            </div>
+                            
+                            <div class="engine-grid">
+                                <div class="engine-row" id="engine-avast">
+                                    <span class="engine-name"><i class="fa-solid fa-shield text-yellow"></i> Avast Antivirus</span>
+                                    <span class="engine-result-badge clean"><i class="fa-solid fa-circle-check"></i> Clean</span>
+                                </div>
+                                <div class="engine-row" id="engine-bitdefender">
+                                    <span class="engine-name"><i class="fa-solid fa-shield-halved text-cyan"></i> Bitdefender</span>
+                                    <span class="engine-result-badge clean"><i class="fa-solid fa-circle-check"></i> Clean</span>
+                                </div>
+                                <div class="engine-row" id="engine-crowdstrike">
+                                    <span class="engine-name"><i class="fa-solid fa-spider text-purple"></i> CrowdStrike Falcon</span>
+                                    <span class="engine-result-badge clean"><i class="fa-solid fa-circle-check"></i> Clean</span>
+                                </div>
+                                <div class="engine-row" id="engine-kaspersky">
+                                    <span class="engine-name"><i class="fa-solid fa-shield-virus text-cyan"></i> Kaspersky Lab</span>
+                                    <span class="engine-result-badge clean"><i class="fa-solid fa-circle-check"></i> Clean</span>
+                                </div>
+                                <div class="engine-row" id="engine-malwarebytes">
+                                    <span class="engine-name"><i class="fa-solid fa-biohazard text-yellow"></i> Malwarebytes</span>
+                                    <span class="engine-result-badge clean"><i class="fa-solid fa-circle-check"></i> Clean</span>
+                                </div>
+                                <div class="engine-row" id="engine-ms-defender">
+                                    <span class="engine-name"><i class="fa-brands fa-windows text-cyber"></i> Microsoft Defender</span>
+                                    <span class="engine-result-badge clean"><i class="fa-solid fa-circle-check"></i> Clean</span>
+                                </div>
+                                <div class="engine-row" id="engine-sentinelone">
+                                    <span class="engine-name"><i class="fa-solid fa-shield-cat text-purple"></i> SentinelOne</span>
+                                    <span class="engine-result-badge clean"><i class="fa-solid fa-circle-check"></i> Clean</span>
+                                </div>
+                                <div class="engine-row" id="engine-sophos">
+                                    <span class="engine-name"><i class="fa-solid fa-cubes text-blue"></i> Sophos InterceptX</span>
+                                    <span class="engine-result-badge clean"><i class="fa-solid fa-circle-check"></i> Clean</span>
+                                </div>
+                                <div class="engine-row" id="engine-symantec">
+                                    <span class="engine-name"><i class="fa-solid fa-user-shield text-blue"></i> Symantec Endpoint</span>
+                                    <span class="engine-result-badge clean"><i class="fa-solid fa-circle-check"></i> Clean</span>
+                                </div>
+                                <div class="engine-row" id="engine-fireeye">
+                                    <span class="engine-name"><i class="fa-solid fa-eye text-red"></i> Trellix / FireEye</span>
+                                    <span class="engine-result-badge clean"><i class="fa-solid fa-circle-check"></i> Clean</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Static Heuristics Warnings Box -->
+                            <div class="heuristic-warnings-box hidden" id="heuristic-warnings-box">
+                                <h4><i class="fa-solid fa-triangle-exclamation text-yellow"></i> STATIC HEURISTIC TRIPPERS</h4>
+                                <ul class="warnings-list-items" id="warnings-list-items">
+                                    <!-- Populated programmatically -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Metadata & Hashes -->
+                        <div class="tab-pane" id="tab-metadata">
+                            <table class="meta-table">
+                                <tbody>
+                                    <tr>
+                                        <td>File Name</td>
+                                        <td id="meta-filename" class="selectable-cell">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>File Size</td>
+                                        <td id="meta-filesize">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Declared MIME</td>
+                                        <td id="meta-mime">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Detected Type</td>
+                                        <td id="meta-magic-type">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>MD5 Hash</td>
+                                        <td class="selectable-cell font-mono break-all" id="meta-md5">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>SHA-1 Hash</td>
+                                        <td class="selectable-cell font-mono break-all" id="meta-sha1">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>SHA-256 Hash</td>
+                                        <td class="selectable-cell font-mono break-all" id="meta-sha256">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Entropy Metric</td>
+                                        <td id="meta-entropy">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="entropy-graph-section">
+                                <h4>Entropy Distribution Profile</h4>
+                                <div class="entropy-canvas-container">
+                                    <canvas id="entropy-canvas" height="90"></canvas>
+                                </div>
+                                <span class="entropy-legend"><i class="fa-solid fa-chart-line text-cyan"></i> Distribution across 16 segments of the file. Packed/encrypted code displays flat entropy peaks (~7.5+).</span>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Magic Bytes Hex Dump -->
+                        <div class="tab-pane" id="tab-hex">
+                            <div class="hex-dump-container">
+                                <div class="hex-header">
+                                    <span>Offset</span>
+                                    <span>Hexadecimal Signature</span>
+                                    <span>ASCII</span>
+                                </div>
+                                <div class="hex-lines" id="hex-lines-container">
+                                    <!-- Populated programmatically -->
+                                </div>
+                            </div>
+                            <span class="hex-explanation"><i class="fa-solid fa-info-circle"></i> Above represents the first 48 magic bytes of the file. Used to identify underlying file signatures independent of the user-visible extension.</span>
+                        </div>
+
+                        <!-- Tab 4: Extracted Strings -->
+                        <div class="tab-pane" id="tab-strings">
+                            <div class="strings-search-bar">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="strings-search-input" placeholder="Search extracted strings (URLs, IPs, DLL imports...)" />
+                            </div>
+                            <div class="strings-list-container">
+                                <ul class="strings-list" id="strings-list">
+                                    <!-- Populated programmatically -->
+                                </ul>
+                            </div>
+                            <span class="strings-explanation"><i class="fa-solid fa-info-circle"></i> Displaying top printable ASCII sequences (length 4+) scanned directly from the file buffer. Useful for locating static domains, system calls, and plain-text variables.</span>
+                        </div>
+
+                        <!-- Tab 5: IOCs -->
+                        <div class="tab-pane" id="tab-ioc">
+                            <div class="engine-scans-header">
+                                <h3><i class="fa-solid fa-link text-blue"></i> INDICATORS OF COMPROMISE</h3>
+                            </div>
+                            <div class="ioc-container" id="ioc-content">
+                                <p class="text-muted">Analyze file for IPs, Domains, and crypto wallets...</p>
+                            </div>
+                        </div>
+
+                        <!-- Tab 6: Format Analysis -->
+                        <div class="tab-pane" id="tab-pe">
+                            <div class="engine-scans-header">
+                                <h3><i class="fa-solid fa-microchip text-purple"></i> PE / APK STRUCTURE</h3>
+                            </div>
+                            <div class="format-container" id="format-content">
+                                <p class="text-muted">Parse executable imports, exports, and permissions...</p>
+                            </div>
+                        </div>
+
+                        <!-- Tab 7: Sandbox -->
+                        <div class="tab-pane" id="tab-sandbox">
+                            <div class="engine-scans-header">
+                                <h3><i class="fa-solid fa-box text-cyan"></i> SANDBOX SIMULATION</h3>
+                            </div>
+                            <div class="sandbox-container" id="sandbox-content">
+                                <p class="text-muted">Simulated run execution graph...</p>
+                            </div>
+                        </div>
+
+                        <!-- Tab 8: MITRE -->
+                        <div class="tab-pane" id="tab-mitre">
+                            <div class="engine-scans-header">
+                                <h3><i class="fa-solid fa-chess-knight text-yellow"></i> MITRE ATT&CK MAPPING</h3>
+                            </div>
+                            <div class="mitre-container" id="mitre-content">
+                                <p class="text-muted">Map static heuristics to MITRE tactics...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Remedy Action Plan -->
+                    <div class="remedy-container" id="remedy-container">
+                        <!-- Populated programmatically based on threat severity -->
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="results-actions">
+                        <button class="btn btn-secondary" id="btn-copy-hash"><i class="fa-regular fa-copy"></i> Copy SHA-256</button>
+                        <button class="btn btn-primary" id="btn-download-report"><i class="fa-solid fa-download"></i> Save Report</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Live Intelligence Feed & Educational Info -->
+        <section class="intel-section">
+            <div class="intel-header">
+                <h2><i class="fa-solid fa-network-wired text-cyber"></i> GLOBAL THREAT TICKER</h2>
+                <div class="threat-pulse"></div>
+            </div>
+            <div class="ticker-wrapper">
+                <div class="ticker-scroll" id="ticker-scroll">
+                    <!-- Dynamic updates inserted here -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; 2026 AetherScan Security Labs. All audits executed locally in sandboxed client browser.</p>
+            <div class="footer-links">
+                <a href="#"><i class="fa-solid fa-shield"></i> Terms of Audit</a>
+                <a href="#"><i class="fa-solid fa-code"></i> Open Source Engine</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- VirusTotal API Configuration Modal -->
+    <div class="modal-overlay hidden" id="settings-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-shield-halved text-cyan"></i> API Configuration</h3>
+                <button class="btn-close" id="close-settings-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Enhance the reputation lookup step by integrating your own VirusTotal API Key. This will perform real-time, live reputation database queries.</p>
+                
+                <div class="form-group">
+                    <label for="vt-api-key">VirusTotal API Key (Public/Private)</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-key"></i>
+                        <input type="password" id="vt-api-key" placeholder="Enter your 64-character VT API key">
+                        <button class="toggle-password-btn" id="toggle-vt-password"><i class="fa-regular fa-eye"></i></button>
+                    </div>
+                    <span class="help-text">Leave blank to use AetherScan's local signature-heuristic engine simulation. Your key is stored securely in local browser storage.</span>
+                </div>
+
+                <div class="api-status-box" id="api-status-box">
+                    <span class="api-status-title">Status:</span>
+                    <span class="api-status-badge inactive" id="api-status-badge">NOT CONFIGURABLE</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-clear-settings">Reset Key</button>
+                <button class="btn btn-primary" id="btn-save-settings">Apply API Key</button>
+            </div>
+        </div>
+    </div>
+    <!-- History Modal -->
+    <div class="modal-overlay hidden" id="history-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-clock-rotate-left text-cyan"></i> Scan History</h3>
+                <button class="btn-close" id="close-history-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="history-list" class="history-list">
+                    <p class="text-muted">Loading history...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Logic -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>

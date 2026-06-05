@@ -1,0 +1,12 @@
+{
+  "name": "aetherscan",
+  "version": "1.0.0",
+  "description": "AetherScan Heuristic File Auditor and Reputation Analyzer",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite --host"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0"
+  }
+}
