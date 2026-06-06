@@ -154,5 +154,5 @@ This tool is for **educational and research purposes only**. It performs **clien
 ---
 
 <p align="center">
-  Made with 💙 by <strong>Vansh</strong>
+  Made with 💙 by <strong>Vansh Yadav</strong>
 </p>
